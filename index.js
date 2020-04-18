@@ -37,9 +37,7 @@ function customContent(variant) {
   }
 }
 
-const VARIANT_COOKIE = "variantID"
-
-// Function to get cookie, from the Cloudflare Templates
+// Function to retrieve cookie, from Cloudflare Templates
 function getCookie(request, name) {
   let result = null
   let cookieString = request.headers.get('Cookie')
@@ -56,12 +54,14 @@ function getCookie(request, name) {
   return result
 }
 
+const VARIANT_COOKIE = "variantID"
+
 async function handleRequest(request) {
   let urlResponse = await fetch("https://cfw-takehome.developers.workers.dev/api/variants")
   let variantsJson = await urlResponse.json()
   let variantsLinks = variantsJson["variants"]
 
-  // See if there is a cookie of variantID with the request and return value
+  // See if there is a cookie of variantID and return it
   const cookie = getCookie(request, VARIANT_COOKIE)
   
   // If there is cookie for variant already, use that, else generate random variant
@@ -70,13 +70,14 @@ async function handleRequest(request) {
   // Fetch one the variants and create a custom rewriter for that variant
   let variantResponse = await fetch(variantsLinks[variant])
 
-  // If there is not a cookie, set the cookie
+  // If the cookie does not exist, set the cookie
   if (!cookie) {
+    // Make headers mutable by recreating response
     variantResponse = new Response(variantResponse.body, variantResponse)
     variantResponse.headers.set('Set-Cookie', `${VARIANT_COOKIE}=${variant}`)
   }
 
-  // Edit the response with custom html
+  // Edit the response with custom html based on variant
   let rewriter = createRewriter(variant)
   let transformedResponse = await rewriter.transform(variantResponse)
   return transformedResponse;
