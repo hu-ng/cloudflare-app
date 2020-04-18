@@ -77,10 +77,10 @@ async function handleRequest(request) {
     variantResponse.headers.set('Set-Cookie', `${VARIANT_COOKIE}=${variant}`)
   }
 
-  // Edit the response with custom html based on variant
+  // Edit the response with custom html based on variant 
   let rewriter = createRewriter(variant)
   let transformedResponse = await rewriter.transform(variantResponse)
-  return transformedResponse;
+  return transformedResponse
 }
 
 addEventListener('fetch', event => {
